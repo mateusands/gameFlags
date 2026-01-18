@@ -42,6 +42,9 @@ O jogo testa conhecimentos de geografia, rapidez e atenção, errar ou deixar o 
 ## Estrutura do projeto
 
 ├── index.html
+
 ├── style.css
+
 ├── main.js
+
 └── README.md
