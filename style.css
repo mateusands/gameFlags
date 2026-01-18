@@ -1,3 +1,4 @@
+/* Reset global para evitar que padding quebre o layout no celular */
 * {
   box-sizing: border-box;
 }

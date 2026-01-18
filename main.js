@@ -47,8 +47,6 @@ const translations = {
   }
 };
 
-/* ================= DADOS (LISTA COMPLETA RESTAURADA) ================= */
-
 const countries = [
   // --- AMÉRICAS ---
   { name: { pt: "Brasil", en: "Brazil" }, code: "br" },
