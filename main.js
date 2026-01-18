@@ -292,7 +292,7 @@ window.goBackToMenu = function() {
   optionsEl.innerHTML = "";
   score = 0;
   scoreEl.textContent = "0";
-  timerEl.textContent = "5";
+  timerEl.textContent = "10";
   
   // Troca as telas
   gameContainerEl.classList.add("hidden");
