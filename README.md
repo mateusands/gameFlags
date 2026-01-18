@@ -12,7 +12,7 @@ O jogo testa conhecimentos de geografia, rapidez e atenção, errar ou deixar o 
 
 - Uma bandeira é exibida no centro da tela
 - Quatro opções de países aparecem abaixo
-- O jogador tem **5 segundos** para escolher
+- O jogador tem **10 segundos** para escolher
 - ✅ Acertou → ganha ponto e continua
 - ❌ Errou ou o tempo acabou → **Game Over**
 - O jogo salva o **recorde da sessão**
@@ -23,7 +23,7 @@ O jogo testa conhecimentos de geografia, rapidez e atenção, errar ou deixar o 
 
 - Tema escuro
 - Diversas bandeiras (incluindo ilhas e países menos comuns)
-- Timer de 5 segundos por rodada
+- Timer de 10 segundos por rodada
 - Opções aleatórias sem repetir bandeiras na mesma sessão
 - Sistema de pontuação e recorde
 - Botão de recomeçar ao perder

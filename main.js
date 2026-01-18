@@ -263,7 +263,7 @@ const countries = [
 
 let score = 0;
 let highScore = localStorage.getItem("highScore") || 0;
-let timeLeft = 5;
+let timeLeft = 10;
 let timerInterval = null;
 let gameActive = false;
 
@@ -323,7 +323,7 @@ function shuffle(array) {
 
 function startTimer() {
   clearInterval(timerInterval);
-  timeLeft = 5;
+  timeLeft = 10;
   timerEl.textContent = timeLeft;
 
   timerInterval = setInterval(() => {
