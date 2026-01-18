@@ -1,100 +1,161 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #0f0f0f;
   color: #eaeaea;
   text-align: center;
+  overflow-x: hidden;
+  padding-bottom: 40px; /* Espaço extra no final para scrolar */
 }
 
 header {
-  padding: 20px 10px;
+  padding: 15px 10px;
+  background: #141414; /* Leve destaque no header */
+  border-bottom: 1px solid #222;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 1.4rem;
+  margin: 5px 0 15px 0;
 }
 
 .stats {
   display: flex;
   justify-content: center;
   gap: 20px;
-  margin-top: 10px;
+  font-size: 0.95rem;
+  color: #ccc;
 }
 
 main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 20px; /* Aumentei o espaço entre os elementos principais */
+  width: 100%;
+  padding: 0 15px; /* Margem lateral segura para celular */
+}
+
+/* Tela de Idioma */
+#languageSelection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-top: 40px;
+}
+
+#gameContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 15px;
 }
 
 .timer-box {
   background: #1e1e1e;
-  padding: 12px 24px;
-  border-radius: 10px;
-  font-size: 22px;
+  padding: 10px 25px;
+  border-radius: 50px; /* Mais arredondado */
+  font-size: 20px;
   font-weight: bold;
   border: 2px solid #333;
+  margin-bottom: 5px;
 }
 
 #flag {
-  width: 260px;
-  height: 170px; /* proporção padrão 3:2 */
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  aspect-ratio: 3/2;
   object-fit: contain;
   background: #1c1c1c;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 2px solid #333;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5); /* Sombra para destacar */
 }
 
 #options {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 12px; /* Espaço entre os botões de resposta */
+  width: 100%;
+  align-items: center;
 }
 
 #options button {
-  width: 260px;
-  padding: 12px;
+  width: 100%;
+  max-width: 320px;
+  padding: 14px;
   font-size: 16px;
   background: #1c1c1c;
   color: #fff;
   border: 1px solid #333;
   border-radius: 8px;
   cursor: pointer;
+  touch-action: manipulation;
+  transition: background 0.2s;
 }
 
-#options button:hover {
+#options button:active, #options button:hover {
   background: #333;
+  transform: translateY(-2px); /* Efeito visual de clique */
 }
 
-#startBtn, #restartBtn {
-  padding: 12px 26px;
+/* Botões Verdes (Start/Restart/Idioma) */
+#startBtn, #restartBtn, .lang-btn {
+  padding: 15px 0;
+  width: 100%;
+  max-width: 250px;
   font-size: 16px;
+  font-weight: bold;
   border: none;
   border-radius: 8px;
   background: #2e7d32;
   color: #fff;
   cursor: pointer;
+  margin-top: 10px;
 }
 
-#startBtn:hover, #restartBtn:hover {
+#startBtn:hover, #restartBtn:hover, .lang-btn:hover {
   background: #388e3c;
+}
+
+/* Botão "Voltar" Discreto */
+#backBtn {
+  margin-top: 30px;
+  background: transparent;
+  border: none;
+  color: #666;
+  text-decoration: underline;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 10px;
+}
+#backBtn:hover {
+  color: #aaa;
+}
+
+/* UTILITÁRIOS */
+.hidden {
+  display: none !important;
 }
 
 /* GAME OVER */
 #gameOver {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.92);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 20px;
+  gap: 25px;
   z-index: 999;
-
-  opacity: 1;
-  pointer-events: auto;
-  transition: opacity 0.3s ease;
-}
-
-#gameOver.hidden {
-  opacity: 0;
-  pointer-events: none;
+  padding: 20px;
 }

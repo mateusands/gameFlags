@@ -2,36 +2,48 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Adivinhe a Bandeira</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Flag Guess Game</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <header>
-    <h1>🌍 Adivinhe a Bandeira</h1>
+    <h1 id="uiTitle">🌍 Adivinhe a Bandeira</h1>
 
     <div class="stats">
-      <span>Pontuação: <strong id="score">0</strong></span>
-      <span>Recorde: <strong id="highScore">0</strong></span>
+      <span><span id="uiScoreLabel">Pontos</span>: <strong id="score">0</strong></span>
+      <span><span id="uiHighScoreLabel">Recorde</span>: <strong id="highScore">0</strong></span>
     </div>
   </header>
 
   <main>
-    <div class="timer-box">
-      ⏱️ <span id="timer">5</span>s
+    <div id="languageSelection">
+      <h3>Select Language / Selecione o Idioma</h3>
+      <button class="lang-btn" onclick="setLanguage('en')">🇺🇸 English</button>
+      <button class="lang-btn" onclick="setLanguage('pt')">🇧🇷 Português</button>
     </div>
 
-    <img id="flag" alt="Bandeira" style="display:none">
+    <div id="gameContainer" class="hidden">
+      <div class="timer-box">
+        ⏱️ <span id="timer">5</span>s
+      </div>
 
-    <div id="options"></div>
+      <img id="flag" alt="Flag" style="display:none">
 
-    <button id="startBtn">Iniciar Jogo</button>
+      <div id="options"></div>
+
+      <button id="startBtn" class="hidden">Iniciar Jogo</button>
+      
+      <button id="backBtn" onclick="goBackToMenu()">
+        ← Mudar Idioma / Change Language
+      </button>
+    </div>
   </main>
 
-  <!-- GAME OVER -->
   <div id="gameOver" class="hidden">
-    <h2>💀 Você perdeu!</h2>
-    <p>Sua pontuação foi: <strong id="finalScore">0</strong></p>
+    <h2 id="uiGameOver">💀 Você perdeu!</h2>
+    <p><span id="uiFinalScoreLabel">Pontuação final:</span> <strong id="finalScore">0</strong></p>
     <button id="restartBtn">Recomeçar</button>
   </div>
 
