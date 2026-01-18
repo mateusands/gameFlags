@@ -37,7 +37,7 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px; /* Aumentei o espaço entre os elementos principais */
+  gap: 20px;
   width: 100%;
   padding: 0 15px; /* Margem lateral segura para celular */
 }
@@ -62,7 +62,7 @@ main {
 .timer-box {
   background: #1e1e1e;
   padding: 10px 25px;
-  border-radius: 50px; /* Mais arredondado */
+  border-radius: 50px;
   font-size: 20px;
   font-weight: bold;
   border: 2px solid #333;
@@ -78,13 +78,13 @@ main {
   background: #1c1c1c;
   border-radius: 12px;
   border: 2px solid #333;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5); /* Sombra para destacar */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
 #options {
   display: flex;
   flex-direction: column;
-  gap: 12px; /* Espaço entre os botões de resposta */
+  gap: 12px;
   width: 100%;
   align-items: center;
 }
