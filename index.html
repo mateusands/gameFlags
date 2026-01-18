@@ -1,12 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <title>Adivinhe a Bandeira</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Teste</h1>
-    <h2>Teste 1.0</h2>
+
+  <header>
+    <h1>🌍 Adivinhe a Bandeira</h1>
+
+    <div class="stats">
+      <span>Pontuação: <strong id="score">0</strong></span>
+      <span>Recorde: <strong id="highScore">0</strong></span>
+    </div>
+  </header>
+
+  <main>
+    <div class="timer-box">
+      ⏱️ <span id="timer">5</span>s
+    </div>
+
+    <img id="flag" alt="Bandeira" style="display:none">
+
+    <div id="options"></div>
+
+    <button id="startBtn">Iniciar Jogo</button>
+  </main>
+
+  <!-- GAME OVER -->
+  <div id="gameOver" class="hidden">
+    <h2>💀 Você perdeu!</h2>
+    <p>Sua pontuação foi: <strong id="finalScore">0</strong></p>
+    <button id="restartBtn">Recomeçar</button>
+  </div>
+
+  <script src="main.js"></script>
 </body>
 </html>
