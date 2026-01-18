@@ -244,7 +244,19 @@ const countries = [
   { name: { pt: "Ilhas Salomão", en: "Solomon Islands" }, code: "sb" },
   { name: { pt: "Tonga", en: "Tonga" }, code: "to" },
   { name: { pt: "Tuvalu", en: "Tuvalu" }, code: "tv" },
-  { name: { pt: "Vanuatu", en: "Vanuatu" }, code: "vu" }
+  { name: { pt: "Vanuatu", en: "Vanuatu" }, code: "vu" },
+
+  // --- OUTROS ---
+  
+  { name: { pt: "Belize", en: "Belize" }, code: "bz" },
+  { name: { pt: "Bielorrússia", en: "Belarus" }, code: "by" },
+  { name: { pt: "Kosovo", en: "Kosovo" }, code: "xk" },
+  { name: { pt: "República Democrática do Congo", en: "DR Congo" }, code: "cd" },
+  { name: { pt: "República Centro-Africana", en: "Central African Republic" }, code: "cf" },
+  { name: { pt: "Essuatíni", en: "Eswatini" }, code: "sz" },
+  { name: { pt: "Timor-Leste", en: "East Timor" }, code: "tl" },
+  { name: { pt: "Taiwan", en: "Taiwan" }, code: "tw" },
+  { name: { pt: "Palestina", en: "Palestine" }, code: "ps" }
 ];
 
 /* ================= ESTADO ================= */
