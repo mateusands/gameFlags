@@ -2,7 +2,7 @@
 
 Um jogo simples e divertido feito para navegador onde o jogador deve adivinhar o país correto a partir da bandeira exibida.
 
-O jogo testa conhecimentos de geografia, rapidez e atenção — errar ou deixar o tempo acabar encerra a partida.
+O jogo testa conhecimentos de geografia, rapidez e atenção, errar ou deixar o tempo acabar encerra a partida.
 
 👉 Jogue online: https://mateusands.github.io/gameFlags/
 
@@ -19,18 +19,18 @@ O jogo testa conhecimentos de geografia, rapidez e atenção — errar ou deixar
 
 ---
 
-## 🕹️ Funcionalidades
+## Funcionalidades
 
-- 🌑 Tema escuro
-- 🏳️‍🌈 Diversas bandeiras (incluindo ilhas e países menos comuns)
-- ⏱️ Timer de 5 segundos por rodada
-- 🧠 Opções aleatórias sem repetir bandeiras na mesma sessão
-- 🏆 Sistema de pontuação e recorde
-- 🔁 Botão de recomeçar ao perder
+- Tema escuro
+- Diversas bandeiras (incluindo ilhas e países menos comuns)
+- Timer de 5 segundos por rodada
+- Opções aleatórias sem repetir bandeiras na mesma sessão
+- Sistema de pontuação e recorde
+- Botão de recomeçar ao perder
 
 ---
 
-## 🛠️ Tecnologias utilizadas
+## Tecnologias utilizadas
 
 - HTML5
 - CSS3
@@ -39,17 +39,9 @@ O jogo testa conhecimentos de geografia, rapidez e atenção — errar ou deixar
 
 ---
 
-## 📁 Estrutura do projeto
+## Estrutura do projeto
 
 ├── index.html
 ├── style.css
 ├── main.js
 └── README.md
-
----
-
-## 🚀 Como rodar localmente
-
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/mateusands/NOME-DO-REPOSITORIO.git
