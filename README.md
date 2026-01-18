@@ -4,7 +4,7 @@ Um jogo simples e divertido feito para navegador onde o jogador deve adivinhar o
 
 O jogo testa conhecimentos de geografia, rapidez e atenção — errar ou deixar o tempo acabar encerra a partida.
 
-👉 Jogue online: https://mateusands.github.io/NOME-DO-REPOSITORIO/
+👉 Jogue online: https://mateusands.github.io/gameFlags/
 
 ---
 
