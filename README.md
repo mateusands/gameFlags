@@ -41,3 +41,15 @@ O jogo testa conhecimentos de geografia, rapidez e atenção — errar ou deixar
 
 ## 📁 Estrutura do projeto
 
+├── index.html
+├── style.css
+├── main.js
+└── README.md
+
+---
+
+## 🚀 Como rodar localmente
+
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/mateusands/NOME-DO-REPOSITORIO.git
