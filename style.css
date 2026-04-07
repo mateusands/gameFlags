@@ -73,9 +73,9 @@ main {
   width: 100%;
   max-width: 320px;
   height: auto;
-  aspect-ratio: 3/2;
+  min-height: 100px;
+  max-height: 240px;
   object-fit: contain;
-  background: #1c1c1c;
   border-radius: 12px;
   border: 2px solid #333;
   box-shadow: 0 4px 10px rgba(0,0,0,0.5);
