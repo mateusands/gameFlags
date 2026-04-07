@@ -12,21 +12,24 @@ O jogo testa conhecimentos de geografia, rapidez e atenção, errar ou deixar o 
 
 - Uma bandeira é exibida no centro da tela
 - Quatro opções de países aparecem abaixo
-- O jogador tem **10 segundos** para escolher
+- O jogador tem **5 segundos** para escolher
 - ✅ Acertou → ganha ponto e continua
 - ❌ Errou ou o tempo acabou → **Game Over**
-- O jogo salva o **recorde da sessão**
+- O jogo salva o **recorde local** (localStorage)
 
 ---
 
 ## Funcionalidades
 
 - Tema escuro
-- Diversas bandeiras (incluindo ilhas e países menos comuns)
-- Timer de 10 segundos por rodada
+- **~250 países** carregados via [RestCountries API](https://restcountries.com) (incluindo países menos comuns)
+- Bandeiras em SVG via [flagcdn.com](https://flagcdn.com)
+- Timer de **5 segundos** por rodada
 - Opções aleatórias sem repetir bandeiras na mesma sessão
 - Sistema de pontuação e recorde
 - Botão de recomeçar ao perder
+- **9 idiomas disponíveis:** Português, English, Español, 日本語, 中文, 한국어, Русский, Français, Italiano
+- Nomes dos países traduzidos automaticamente no idioma escolhido
 
 ---
 
@@ -35,6 +38,8 @@ O jogo testa conhecimentos de geografia, rapidez e atenção, errar ou deixar o 
 - HTML5
 - CSS3
 - JavaScript (Vanilla)
+- [RestCountries API](https://restcountries.com) — dados dos países
+- [flagcdn.com](https://flagcdn.com) — imagens das bandeiras em SVG
 - GitHub Pages para hospedagem
 
 ---
