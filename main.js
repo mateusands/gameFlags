@@ -31,10 +31,12 @@ let currentLang = 'pt';
 
 // Tabela ÚNICA de textos da UI. Toda string visível mora aqui, nas 9 entradas —
 // chave faltando renderiza `undefined` na tela, sem erro no console.
-// `htmlLang` é o valor aplicado em <html lang> (acessibilidade / leitor de tela).
+// `htmlLang`   → valor aplicado em <html lang> (acessibilidade / leitor de tela)
+// `dataLocale` → pasta de idioma na fonte de países (ver seção PAÍSES)
 const translations = {
   pt: {
     htmlLang: "pt-BR",
+    dataLocale: "pt_BR",
     title: "🌍 Adivinhe a Bandeira",
     score: "Pontos",
     record: "Recorde",
@@ -50,6 +52,7 @@ const translations = {
   },
   en: {
     htmlLang: "en",
+    dataLocale: "en",
     title: "🌍 Guess the Flag",
     score: "Score",
     record: "Best",
@@ -65,6 +68,7 @@ const translations = {
   },
   es: {
     htmlLang: "es",
+    dataLocale: "es",
     title: "🌍 Adivina la Bandera",
     score: "Puntos",
     record: "Récord",
@@ -80,6 +84,7 @@ const translations = {
   },
   ja: {
     htmlLang: "ja",
+    dataLocale: "ja",
     title: "🌍 国旗を当てよう",
     score: "スコア",
     record: "最高記録",
@@ -95,6 +100,7 @@ const translations = {
   },
   zh: {
     htmlLang: "zh-CN",
+    dataLocale: "zh_CN",
     title: "🌍 猜国旗",
     score: "分数",
     record: "最高分",
@@ -110,6 +116,7 @@ const translations = {
   },
   ko: {
     htmlLang: "ko",
+    dataLocale: "ko",
     title: "🌍 국기를 맞춰보세요",
     score: "점수",
     record: "최고 기록",
@@ -125,6 +132,7 @@ const translations = {
   },
   ru: {
     htmlLang: "ru",
+    dataLocale: "ru",
     title: "🌍 Угадай флаг",
     score: "Очки",
     record: "Рекорд",
@@ -140,6 +148,7 @@ const translations = {
   },
   fr: {
     htmlLang: "fr",
+    dataLocale: "fr",
     title: "🌍 Devine le Drapeau",
     score: "Points",
     record: "Record",
@@ -155,6 +164,7 @@ const translations = {
   },
   it: {
     htmlLang: "it",
+    dataLocale: "it",
     title: "🌍 Indovina la Bandiera",
     score: "Punti",
     record: "Record",
@@ -174,52 +184,92 @@ function t() {
   return translations[currentLang];
 }
 
-let countries = [];
+/* ================= PAÍSES (DADOS) ================= */
+
+// Duas fontes, em cascata:
+//   1. jsDelivr servindo os dados ICU/CLDR do umpirsky/country-list, fixados na tag
+//      2.0.6 (cache imutável). Um arquivo por idioma, 4–16 KB.
+//   2. `countries.json` deste próprio repo, com os 9 idiomas de uma vez.
+// A reserva existe porque a restcountries v3.1 — a fonte anterior — foi desligada sem
+// aviso e levou o jogo junto. Serviço de terceiro não pode ser ponto único de falha.
+const COUNTRIES_CDN = "https://cdn.jsdelivr.net/gh/umpirsky/country-list@2.0.6/data/{locale}/country.json";
+const COUNTRIES_FALLBACK = "./countries.json";
+
+let countriesByLang = {};   // cache por idioma: { pt: [{ code, name }], ... }
+let countries = [];         // lista já resolvida para o idioma atual
 let countriesPromise = null;
 
-/* ================= PAÍSES (API) ================= */
-
-// Contrato: `countries` só recebe uma lista utilizável (>= MIN_OPTIONS países com
-// código ISO e nome). Qualquer outra coisa — HTTP != 2xx, corpo que não é lista,
-// lista curta demais — deixa `countries` vazio, e quem consome trata isso.
-async function loadCountries() {
-  try {
-    const res = await fetch("https://restcountries.com/v3.1/all?fields=name,cca2,translations");
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-    const data = await res.json();
-    if (!Array.isArray(data)) throw new Error("Resposta da API não é uma lista");
-
-    const parsed = data
-      .filter(c => c.cca2 && c.name?.common)
-      .map(c => ({
-        name: {
-          en: c.name.common,
-          pt: c.translations?.por?.common || c.name.common,
-          es: c.translations?.spa?.common || c.name.common,
-          ja: c.translations?.jpn?.common || c.name.common,
-          zh: c.translations?.zho?.common || c.name.common,
-          ko: c.translations?.kor?.common || c.name.common,
-          ru: c.translations?.rus?.common || c.name.common,
-          fr: c.translations?.fra?.common || c.name.common,
-          it: c.translations?.ita?.common || c.name.common
-        },
-        code: c.cca2.toLowerCase()
-      }));
-
-    if (parsed.length < MIN_OPTIONS) throw new Error(`Só ${parsed.length} países utilizáveis`);
-
-    countries = parsed;
-  } catch (e) {
-    countries = [];
-    console.error("Erro ao carregar países:", e);
-  }
+async function fetchJson(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status} em ${url}`);
+  return res.json();
 }
 
-// Deve reaproveitar o fetch em voo quando chamada de novo antes do anterior terminar
-// (dois cliques rápidos em idiomas diferentes disparavam dois carregamentos).
-// Resolve para `true` quando há países suficientes para jogar.
+// Formato do CDN: { "BR": "Brasil", ... } → [{ code: "br", name: "Brasil" }]
+function parseSingleLang(data) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return [];
+
+  return Object.entries(data)
+    .filter(([code, name]) => /^[a-z]{2}$/i.test(code) && typeof name === "string" && name.trim())
+    .map(([code, name]) => ({ code: code.toLowerCase(), name }));
+}
+
+// Formato local: { "BR": { pt: "Brasil", en: "Brazil", ... } }.
+// Preenche o cache dos 9 idiomas de uma vez — depois disso trocar de idioma é instantâneo.
+function parseAllLangs(data) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return false;
+
+  const langs = Object.keys(translations);
+  const byLang = {};
+  langs.forEach(lang => { byLang[lang] = []; });
+
+  Object.entries(data).forEach(([code, names]) => {
+    if (!/^[a-z]{2}$/i.test(code) || !names || typeof names !== "object") return;
+
+    langs.forEach(lang => {
+      const name = names[lang] || names.en;
+      if (typeof name === "string" && name.trim()) {
+        byLang[lang].push({ code: code.toLowerCase(), name });
+      }
+    });
+  });
+
+  if (byLang[currentLang].length < MIN_OPTIONS) return false;
+
+  countriesByLang = byLang;
+  return true;
+}
+
+// Deve tentar o CDN primeiro e cair para o arquivo local quando ele falhar;
+// deve reportar falha só quando as DUAS fontes falharem.
+async function loadCountries(lang) {
+  try {
+    const url = COUNTRIES_CDN.replace("{locale}", translations[lang].dataLocale);
+    const list = parseSingleLang(await fetchJson(url));
+
+    if (list.length < MIN_OPTIONS) throw new Error(`só ${list.length} países utilizáveis`);
+
+    countriesByLang[lang] = list;
+    return true;
+  } catch (e) {
+    console.warn("CDN de países indisponível, tentando o arquivo local:", e);
+  }
+
+  try {
+    if (parseAllLangs(await fetchJson(COUNTRIES_FALLBACK))) return true;
+    throw new Error("countries.json não tem países utilizáveis");
+  } catch (e) {
+    console.error("Erro ao carregar países:", e);
+  }
+
+  return false;
+}
+
+// Deve reaproveitar o carregamento em voo quando chamada de novo antes do anterior
+// terminar (dois cliques rápidos em idiomas diferentes disparavam dois fetches).
+// Resolve para `true` quando há países suficientes para jogar no idioma atual.
 async function ensureCountries() {
+  countries = countriesByLang[currentLang] || [];
   if (countries.length >= MIN_OPTIONS) return true;
   if (countriesPromise) return countriesPromise;
 
@@ -227,12 +277,15 @@ async function ensureCountries() {
   startBtn.disabled = true;
   startBtn.textContent = t().loading;
 
-  countriesPromise = loadCountries()
+  countriesPromise = loadCountries(currentLang)
     .then(() => {
+      countries = countriesByLang[currentLang] || [];
       const ok = countries.length >= MIN_OPTIONS;
+
       startBtn.disabled = false;
       startBtn.textContent = ok ? t().start : t().retry;
       if (!ok) setMessage(t().loadError);
+
       return ok;
     })
     .finally(() => {
@@ -448,7 +501,7 @@ function newRound() {
 
   options.forEach(country => {
     const btn = document.createElement("button");
-    btn.textContent = country.name[currentLang];
+    btn.textContent = country.name;
     btn.onclick = () => handleAnswer(country.code === correctAnswer.code);
     optionsEl.appendChild(btn);
   });
