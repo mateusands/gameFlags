@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- Sem maximum-scale/user-scalable: bloquear o zoom quebra a acessibilidade no celular -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flag Guess Game</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -33,9 +34,10 @@
 
     <div id="gameContainer" class="hidden">
       <div class="timer-box">
-        ⏱️ <span id="timer">10</span>s
+        ⏱️ <span id="timer">5</span>s
       </div>
 
+      <!-- alt genérico de propósito: o nome do país entregaria a resposta -->
       <img id="flag" alt="Flag" style="display:none">
 
       <div id="options"></div>
