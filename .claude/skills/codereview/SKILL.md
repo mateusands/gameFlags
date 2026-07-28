@@ -1,9 +1,9 @@
 ---
 name: codereview
-description: Code review sênior das últimas mudanças do gameFlags (working tree ou últimos commits), focado em robustez do jogo, manutenibilidade e segurança de front estático. Apenas reporta problemas com arquivo/linha e a refatoração sugerida — não aplica correções.
+description: Code review sênior das últimas mudanças do flag-rush (working tree ou últimos commits), focado em robustez do jogo, manutenibilidade e segurança de front estático. Apenas reporta problemas com arquivo/linha e a refatoração sugerida — não aplica correções.
 ---
 
-# Code Review Sênior — gameFlags
+# Code Review Sênior — flag-rush
 
 Atue como Engenheiro Sênior e revise criticamente as **últimas mudanças deste repositório**.
 

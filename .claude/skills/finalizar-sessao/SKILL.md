@@ -1,9 +1,9 @@
 ---
 name: finalizar-sessao
-description: Encerra a sessão de trabalho no gameFlags — gera o relatório da sessão em .claude/sessions/ e atualiza o CLAUDE.md se algo que ele afirma mudou. Use ao final de cada sessão.
+description: Encerra a sessão de trabalho no flag-rush — gera o relatório da sessão em .claude/sessions/ e atualiza o CLAUDE.md se algo que ele afirma mudou. Use ao final de cada sessão.
 ---
 
-# Encerramento de Sessão — gameFlags
+# Encerramento de Sessão — flag-rush
 
 O objetivo agora **não é codar**, e sim consolidar o que a sessão mudou.
 
