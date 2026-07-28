@@ -6,7 +6,7 @@ description: Inicializa a sessão de trabalho no gameFlags — lê o CLAUDE.md, 
 # Inicialização de Sessão — gameFlags
 
 Jogo de navegador em **HTML + CSS + JS puro**, sem build, publicado no GitHub Pages.
-A fonte da verdade é **o código** — e são só três arquivos.
+A fonte da verdade é **o código** — três arquivos de código mais o `countries.json` de reserva.
 
 Antes de qualquer ação, execute os passos de leitura abaixo:
 
@@ -21,8 +21,10 @@ Antes de qualquer ação, execute os passos de leitura abaixo:
    git status --short && git branch --show-current && git log --oneline -10
    ```
 
-4. **Leia os três arquivos.** `main.js` (318 linhas), `index.html` e `style.css`. O projeto é pequeno o
-   bastante para caber inteiro no contexto — aproveite isso, é a vantagem dele.
+4. **Leia os três arquivos de código.** `main.js` (~609 linhas), `index.html` e `style.css`. O projeto é
+   pequeno o bastante para caber inteiro no contexto — aproveite isso, é a vantagem dele. O
+   `countries.json` é dado gerado (249 países × 9 idiomas): confira formato e contagem, não leia linha
+   a linha.
 
 5. **MODO SOMENTE LEITURA:** é proibido alterar código, criar ou apagar arquivo nesta etapa.
 
@@ -31,7 +33,8 @@ Antes de qualquer ação, execute os passos de leitura abaixo:
 Confirme explicitamente que estão ativos:
 
 - **Zero dependências.** Nada de npm, bundler, framework ou `<script>` de CDN sem pedido explícito. O
-  valor do projeto é ser um arquivo que abre e roda.
+  valor do projeto é ser um arquivo que abre e roda. (Buscar *dados* de um CDN por `fetch` é outra coisa
+  e já é o desenho atual — ver a cascata CDN → `countries.json` no `CLAUDE.md`.)
 - **`main.js` não é módulo ES.** `setLanguage` e `goBackToMenu` vivem em `window` porque o HTML os chama
   por `onclick=`. Mudar o carregamento do script quebra os botões de idioma em silêncio.
 - **9 idiomas.** Toda string visível precisa existir em `pt, en, es, ja, zh, ko, ru, fr, it`.

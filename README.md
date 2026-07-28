@@ -22,14 +22,16 @@ O jogo testa conhecimentos de geografia, rapidez e atenção, errar ou deixar o 
 ## Funcionalidades
 
 - Tema escuro
-- **~250 países** carregados via [RestCountries API](https://restcountries.com) (incluindo países menos comuns)
+- **249 países** com nomes ICU/CLDR, carregados de um CDN com reserva local versionada no repo
 - Bandeiras em SVG via [flagcdn.com](https://flagcdn.com)
-- Timer de **5 segundos** por rodada
-- Opções aleatórias sem repetir bandeiras na mesma sessão
+- Timer de **5 segundos** por rodada, que só começa a contar **depois que a bandeira aparece**
+- A bandeira sorteada não se repete dentro da mesma partida (as alternativas erradas podem)
 - Sistema de pontuação e recorde
-- Botão de recomeçar ao perder
+- Botão de recomeçar ao perder, e troca de idioma acessível em qualquer tela
 - **9 idiomas disponíveis:** Português, English, Español, 日本語, 中文, 한국어, Русский, Français, Italiano
 - Nomes dos países traduzidos automaticamente no idioma escolhido
+- Interface, `<title>` e `<html lang>` acompanham o idioma escolhido
+- Falha de rede é avisada na tela, com opção de tentar novamente — o jogo não trava nem fica mudo
 
 ---
 
@@ -38,7 +40,7 @@ O jogo testa conhecimentos de geografia, rapidez e atenção, errar ou deixar o 
 - HTML5
 - CSS3
 - JavaScript (Vanilla)
-- [RestCountries API](https://restcountries.com) — dados dos países
+- [umpirsky/country-list](https://github.com/umpirsky/country-list) via [jsDelivr](https://www.jsdelivr.com) — nomes dos países (ICU/CLDR)
 - [flagcdn.com](https://flagcdn.com) — imagens das bandeiras em SVG
 - GitHub Pages para hospedagem
 
@@ -46,10 +48,15 @@ O jogo testa conhecimentos de geografia, rapidez e atenção, errar ou deixar o 
 
 ## Estrutura do projeto
 
-├── index.html
+```
+gameFlags/
+├── index.html      # markup e telas
+├── style.css       # estilo
+├── main.js         # traduções, estado, timer, rodadas
+├── countries.json  # reserva de países, usada quando o CDN não responde
+├── README.md
+└── CLAUDE.md       # notas de arquitetura e armadilhas do código
+```
 
-├── style.css
-
-├── main.js
-
-└── README.md
+Sem build, sem `npm install`, sem dependência: são arquivos estáticos. Para rodar local, sirva a
+pasta por HTTP (`python -m http.server 8000`) — abrir por `file://` pode bloquear o `fetch` da API.
