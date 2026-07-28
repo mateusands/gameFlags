@@ -142,7 +142,6 @@ async function loadCountries() {
 /* ================= ESTADO ================= */
 
 let score = 0;
-let highScore = localStorage.getItem("highScore") || 0;
 let timeLeft = 5;
 let timerInterval = null;
 let gameActive = false;
@@ -150,6 +149,29 @@ let gameActive = false;
 let availableCountries = [];
 let correctAnswer = null;
 
+// `localStorage` pode lançar (SecurityError com armazenamento bloqueado,
+// QuotaExceededError em modo privado). Nenhuma dessas falhas pode derrubar o jogo:
+// deve tratar o recorde como 0 quando o valor não puder ser lido ou não for numérico.
+function readHighScore() {
+  try {
+    const raw = Number(localStorage.getItem("highScore"));
+    return Number.isFinite(raw) && raw > 0 ? raw : 0;
+  } catch (e) {
+    console.warn("Recorde indisponível (localStorage bloqueado):", e);
+    return 0;
+  }
+}
+
+// Deve seguir o jogo normalmente quando a escrita falhar — o recorde é conveniência, não requisito.
+function writeHighScore(value) {
+  try {
+    localStorage.setItem("highScore", String(value));
+  } catch (e) {
+    console.warn("Não foi possível salvar o recorde:", e);
+  }
+}
+
+let highScore = readHighScore();
 highScoreEl.textContent = highScore;
 
 /* ================= CONFIG IDIOMA ================= */
@@ -303,8 +325,9 @@ function gameOver() {
 
   if (score > highScore) {
     highScore = score;
-    localStorage.setItem("highScore", highScore);
     highScoreEl.textContent = highScore;
+    // Persistir por último: falha de escrita não pode impedir a tela de resultado.
+    writeHighScore(highScore);
   }
 
   finalScoreEl.textContent = score;
