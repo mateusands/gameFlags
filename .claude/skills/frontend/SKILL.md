@@ -10,13 +10,14 @@ Guia para qualquer mexida no jogo. Segue o `CLAUDE.md`: **não introduza framewo
 
 ## O que este projeto é (e o que ele não é)
 
-Três arquivos estáticos servidos direto pelo GitHub Pages. **Sem npm, sem build, sem transpilação e —
+Quatro arquivos estáticos servidos direto pelo GitHub Pages (`index.html`, `main.js`, `style.css` e o
+`countries.json` de reserva). **Sem npm, sem build, sem transpilação e —
 por ora — sem runner de teste.** O valor dele é abrir e funcionar. Toda proposta de "modernizar" (React, Vite,
 TypeScript, módulos ES) muda a natureza do projeto — só com pedido explícito.
 
 ---
 
-## As 4 regras que quebram o jogo se ignoradas
+## As 5 regras que quebram o jogo se ignoradas
 
 ### 1. `setLanguage` e `goBackToMenu` **precisam** ficar em `window`
 
@@ -41,40 +42,45 @@ Por isso são declarados como `window.setLanguage = ...` no `main.js`. Consequê
 
 - Acrescente a chave em **todas as 9 entradas**. Chave faltando renderiza `undefined` na tela — não dá
   erro, só fica feio para quem usa aquele idioma.
-- Se o texto vem de país (`country.name[currentLang]`), lembre que `loadCountries()` já faz fallback para
-  o nome em inglês quando a tradução não vem da API. Mantenha esse fallback ao mexer no `.map()`.
+- O nome do país (`country.name`) já vem resolvido no idioma atual — `countriesByLang` guarda uma lista
+  por idioma. Ao trocar de idioma, `ensureCountries()` recarrega ou usa o cache; não indexe por idioma
+  na hora de renderizar.
 - Depois de adicionar, **passe pelos 9 idiomas manualmente** e registre isso (ver `/rodar-local`).
 
-### 3. Nenhum caminho pode assumir que a API respondeu
+### 3. Nenhum caminho pode assumir que os dados chegaram
 
-`loadCountries()` engole a falha (`catch` com `console.error`) e deixa `countries = []`. Qualquer código
-que consome `countries` precisa tolerar lista vazia.
+`loadCountries()` tenta o CDN e cai para o `countries.json` local; valida **status e formato** em ambos.
+Quem consome precisa exigir **`countries.length >= MIN_OPTIONS`** — não basta checar se está vazio.
+A fonte anterior (restcountries) morreu devolvendo `200` com corpo de erro: `res.ok` sozinho não protege.
 
-⚠️ **A armadilha ativa:** `newRound()` monta as alternativas com
+⚠️ **Por que o guard existe** (armadilha já corrigida — não a reintroduza): `newRound()` monta as
+alternativas com um `while (options.length < MIN_OPTIONS)` sorteando de `countries`. Com menos países do
+que alternativas **não existem 4 distintos**, o laço nunca termina e a aba congela. O guard está em três
+pontos: `handleStartClick`, `startGame` e `newRound`. Mexer em qualquer um deles exige manter os três.
 
-```js
-while (options.length < 4) {
-  const random = countries[Math.floor(Math.random() * countries.length)];
-  if (!options.includes(random)) options.push(random);
-}
-```
+O caminho de erro tem UI: `setMessage(t().loadError)` e o botão vira `retry`. Não volte ao `catch` mudo.
 
-Com `countries` vazio, `random` é sempre `undefined`: o primeiro entra, e daí em diante o `includes` é
-sempre `true` → **laço infinito, aba congelada**. Ao mexer em `newRound`, `loadCountries` ou no fluxo do
-botão iniciar, garanta um guard (ex.: não habilitar "Iniciar" sem `countries.length >= 4`).
+### 4. Timer sempre com `clearInterval` **e** `clearFlagLoad` antes
 
-### 4. Timer sempre com `clearInterval` antes
+`timerInterval` e `flagWatchdog` são globais e únicos. Todo caminho que muda de tela ou de rodada precisa
+limpar os dois — `startTimer`, `handleAnswer`, `gameOver`, `goBackToMenu` e `showFlag` já fazem. Esquecer
+o `clearInterval` gera **dois intervals correndo juntos** (o contador pula de 2 em 2 e a partida acaba
+sozinha); esquecer o `clearFlagLoad` deixa um `setTimeout` órfão que dispara `onFlagFailed` na rodada
+seguinte.
 
-`timerInterval` é global e único. Todo caminho que muda de tela ou de rodada precisa limpar o anterior —
-`startTimer`, `handleAnswer`, `gameOver` e `goBackToMenu` já fazem. Esquecer gera **dois intervals
-correndo juntos**: o contador pula de 2 em 2 e a partida acaba sozinha. Sintoma clássico de timer vazado.
+### 5. O timer começa no `onload` da bandeira, nunca no `src`
+
+`showFlag()` registra `onload`/`onerror` + watchdog de 8s e só então atribui o `src`. O `startTimer()`
+mora em `onFlagReady`. Isso existe porque os 5 segundos corriam durante o download — em rede lenta o
+jogador perdia metade da rodada olhando tela vazia. `roundReady` bloqueia resposta antes da bandeira
+aparecer. Se separar essas peças, o jogo volta a ser injusto ou fica sem timer.
 
 ---
 
 ## Convenções do código
 
-- **Estrutura por seção comentada** em `main.js` (`ELEMENTOS`, `TRADUÇÕES`, `ESTADO`, `CONFIG IDIOMA`,
-  `UTIL`, `TIMER`, `JOGO`, `GAME OVER`, `EVENTOS`). Coloque o código novo na seção certa.
+- **Estrutura por seção comentada** em `main.js` (`ELEMENTOS`, `TRADUÇÕES`, `PAÍSES (DADOS)`, `ESTADO`,
+  `CONFIG IDIOMA`, `UTIL`, `TIMER`, `JOGO`, `GAME OVER`, `EVENTOS`). Coloque o código novo na seção certa.
 - **Referências ao DOM ficam no topo**, em `const` com `getElementById`. Não busque elemento no meio da
   lógica de jogo.
 - **Troca de tela é `classList.add/remove("hidden")`** — não mexa em `style.display` para telas (o `flag`
@@ -86,10 +92,15 @@ correndo juntos**: o contador pula de 2 em 2 e a partida acaba sozinha. Sintoma 
 
 ## Pontos de atenção conhecidos (não corrija sem pedido, mas saiba que existem)
 
-- `shuffle()` usa `sort(() => Math.random() - 0.5)`, que **não** é permutação uniforme. Se a distribuição
-  das alternativas importar, o correto é Fisher-Yates.
-- `highScore` sai do `localStorage` como **string**; a comparação funciona por coerção.
-- A `<img id="flag">` não tem handler de erro — bandeira que falha fica com o `alt`.
+- **`setInterval` é estrangulado em aba de fundo** — trocar de aba efetivamente pausa os 5 segundos. Não
+  há detecção de foco; conviver com isso é decisão consciente (o placar é local).
+- **`#message` usa `z-index: 1000`** para ficar acima do overlay `#gameOver` (999). Baixar isso esconde o
+  aviso de falha de rede durante a partida.
+- **`flagEl.src` com o mesmo valor não redispara `load`** em alguns navegadores — o retry de bandeira
+  depende de `newRound()` sortear um país diferente.
+- **`localStorage` está encapsulado** em `readHighScore`/`writeHighScore` com `try/catch`. Não chame
+  `localStorage` direto: acesso cru no topo do arquivo derruba o `main.js` inteiro quando o armazenamento
+  está bloqueado, e aí nem os botões de idioma funcionam.
 
 ## SDD + BDD + TDD (obrigatório) — como se aplica sem runner
 
