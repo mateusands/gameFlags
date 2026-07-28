@@ -127,6 +127,12 @@ main {
   background: #388e3c;
 }
 
+#startBtn:disabled {
+  background: #2a2a2a;
+  color: #777;
+  cursor: default;
+}
+
 /* Botão "Voltar" Discreto */
 #backBtn {
   margin-top: 30px;
@@ -140,6 +146,24 @@ main {
 }
 #backBtn:hover {
   color: #aaa;
+}
+
+/* AVISO DE ERRO
+   z-index acima do #gameOver (999) — quando as bandeiras falham, a mensagem
+   precisa aparecer junto com a tela de resultado, não atrás dela. */
+#message {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 14px 20px;
+  background: #4a1c1c;
+  border-bottom: 1px solid #7a2e2e;
+  color: #ffcdcd;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  z-index: 1000;
 }
 
 /* UTILITÁRIOS */

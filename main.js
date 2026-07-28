@@ -6,6 +6,7 @@ const timerEl = document.getElementById("timer");
 const flagEl = document.getElementById("flag");
 const optionsEl = document.getElementById("options");
 const startBtn = document.getElementById("startBtn");
+const messageEl = document.getElementById("message");
 
 // Telas
 const languageSelectionEl = document.getElementById("languageSelection");
@@ -26,12 +27,17 @@ const uiFinalScoreLabel = document.getElementById("uiFinalScoreLabel");
 
 let currentLang = 'pt';
 
+// Tabela ÚNICA de textos da UI. Toda string visível mora aqui, nas 9 entradas —
+// chave faltando renderiza `undefined` na tela, sem erro no console.
 const translations = {
   pt: {
     title: "🌍 Adivinhe a Bandeira",
     score: "Pontos",
     record: "Recorde",
     start: "Iniciar Jogo",
+    loading: "Carregando...",
+    retry: "Tentar Novamente",
+    loadError: "Não foi possível carregar os países. Verifique sua conexão.",
     gameOver: "💀 Fim de Jogo!",
     finalScore: "Sua pontuação:",
     restart: "Jogar Novamente"
@@ -41,6 +47,9 @@ const translations = {
     score: "Score",
     record: "Best",
     start: "Start Game",
+    loading: "Loading...",
+    retry: "Try Again",
+    loadError: "Could not load the countries. Check your connection.",
     gameOver: "💀 Game Over!",
     finalScore: "Your Score:",
     restart: "Play Again"
@@ -50,6 +59,9 @@ const translations = {
     score: "Puntos",
     record: "Récord",
     start: "Iniciar Juego",
+    loading: "Cargando...",
+    retry: "Intentar de Nuevo",
+    loadError: "No se pudieron cargar los países. Comprueba tu conexión.",
     gameOver: "💀 ¡Fin del Juego!",
     finalScore: "Tu puntuación:",
     restart: "Jugar de Nuevo"
@@ -59,6 +71,9 @@ const translations = {
     score: "スコア",
     record: "最高記録",
     start: "ゲームスタート",
+    loading: "読み込み中...",
+    retry: "再試行",
+    loadError: "国データを読み込めませんでした。接続を確認してください。",
     gameOver: "💀 ゲームオーバー！",
     finalScore: "あなたのスコア:",
     restart: "もう一度"
@@ -68,6 +83,9 @@ const translations = {
     score: "分数",
     record: "最高分",
     start: "开始游戏",
+    loading: "加载中...",
+    retry: "重试",
+    loadError: "无法加载国家数据，请检查网络连接。",
     gameOver: "💀 游戏结束！",
     finalScore: "你的分数:",
     restart: "再玩一次"
@@ -77,6 +95,9 @@ const translations = {
     score: "점수",
     record: "최고 기록",
     start: "게임 시작",
+    loading: "로딩 중...",
+    retry: "다시 시도",
+    loadError: "국가 목록을 불러오지 못했습니다. 연결을 확인하세요.",
     gameOver: "💀 게임 오버!",
     finalScore: "당신의 점수:",
     restart: "다시 하기"
@@ -86,6 +107,9 @@ const translations = {
     score: "Очки",
     record: "Рекорд",
     start: "Начать игру",
+    loading: "Загрузка...",
+    retry: "Повторить",
+    loadError: "Не удалось загрузить страны. Проверьте подключение.",
     gameOver: "💀 Игра окончена!",
     finalScore: "Ваш счёт:",
     restart: "Играть снова"
@@ -95,6 +119,9 @@ const translations = {
     score: "Points",
     record: "Record",
     start: "Commencer",
+    loading: "Chargement...",
+    retry: "Réessayer",
+    loadError: "Impossible de charger les pays. Vérifiez votre connexion.",
     gameOver: "💀 Fin de partie !",
     finalScore: "Votre score :",
     restart: "Rejouer"
@@ -104,21 +131,36 @@ const translations = {
     score: "Punti",
     record: "Record",
     start: "Inizia il gioco",
+    loading: "Caricamento...",
+    retry: "Riprova",
+    loadError: "Impossibile caricare i paesi. Controlla la connessione.",
     gameOver: "💀 Game Over!",
     finalScore: "Il tuo punteggio:",
     restart: "Gioca ancora"
   }
 };
 
+function t() {
+  return translations[currentLang];
+}
+
 let countries = [];
+let countriesPromise = null;
 
 /* ================= PAÍSES (API) ================= */
 
+// Contrato: `countries` só recebe uma lista utilizável (>= MIN_OPTIONS países com
+// código ISO e nome). Qualquer outra coisa — HTTP != 2xx, corpo que não é lista,
+// lista curta demais — deixa `countries` vazio, e quem consome trata isso.
 async function loadCountries() {
   try {
     const res = await fetch("https://restcountries.com/v3.1/all?fields=name,cca2,translations");
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
     const data = await res.json();
-    countries = data
+    if (!Array.isArray(data)) throw new Error("Resposta da API não é uma lista");
+
+    const parsed = data
       .filter(c => c.cca2 && c.name?.common)
       .map(c => ({
         name: {
@@ -134,9 +176,40 @@ async function loadCountries() {
         },
         code: c.cca2.toLowerCase()
       }));
+
+    if (parsed.length < MIN_OPTIONS) throw new Error(`Só ${parsed.length} países utilizáveis`);
+
+    countries = parsed;
   } catch (e) {
+    countries = [];
     console.error("Erro ao carregar países:", e);
   }
+}
+
+// Deve reaproveitar o fetch em voo quando chamada de novo antes do anterior terminar
+// (dois cliques rápidos em idiomas diferentes disparavam dois carregamentos).
+// Resolve para `true` quando há países suficientes para jogar.
+async function ensureCountries() {
+  if (countries.length >= MIN_OPTIONS) return true;
+  if (countriesPromise) return countriesPromise;
+
+  setMessage("");
+  startBtn.disabled = true;
+  startBtn.textContent = t().loading;
+
+  countriesPromise = loadCountries()
+    .then(() => {
+      const ok = countries.length >= MIN_OPTIONS;
+      startBtn.disabled = false;
+      startBtn.textContent = ok ? t().start : t().retry;
+      if (!ok) setMessage(t().loadError);
+      return ok;
+    })
+    .finally(() => {
+      countriesPromise = null;
+    });
+
+  return countriesPromise;
 }
 
 /* ================= ESTADO ================= */
@@ -181,21 +254,15 @@ highScoreEl.textContent = highScore;
 
 window.setLanguage = async function(lang) {
   currentLang = lang;
+
   languageSelectionEl.classList.add("hidden");
   gameContainerEl.classList.remove("hidden");
+
+  setMessage("");
   updateUIText();
-
-  if (countries.length === 0) {
-    const loadingText = { pt: "Carregando...", es: "Cargando...", ja: "読み込み中...", zh: "加载中...", ko: "로딩 중...", ru: "Загрузка...", fr: "Chargement...", it: "Caricamento..." };
-    startBtn.textContent = loadingText[currentLang] || "Loading...";
-    startBtn.disabled = true;
-    startBtn.classList.remove("hidden");
-    await loadCountries();
-    startBtn.disabled = false;
-  }
-
-  startBtn.textContent = translations[currentLang].start;
   startBtn.classList.remove("hidden");
+
+  await ensureCountries();
 }
 
 window.goBackToMenu = function() {
@@ -206,7 +273,12 @@ window.goBackToMenu = function() {
   optionsEl.innerHTML = "";
   score = 0;
   scoreEl.textContent = "0";
-  timerEl.textContent = "5";
+  timerEl.textContent = String(ROUND_SECONDS);
+  setMessage("");
+
+  startBtn.disabled = false;
+  startBtn.textContent = countries.length >= MIN_OPTIONS ? t().start : t().retry;
+  startBtn.classList.remove("hidden");
 
   gameContainerEl.classList.add("hidden");
   languageSelectionEl.classList.remove("hidden");
@@ -237,6 +309,12 @@ function shuffle(array) {
   return array;
 }
 
+// Aviso ao usuário. String vazia esconde. Sempre `textContent` — nunca `innerHTML`.
+function setMessage(text) {
+  messageEl.textContent = text;
+  messageEl.classList.toggle("hidden", !text);
+}
+
 /* ================= TIMER ================= */
 
 function startTimer() {
@@ -257,12 +335,29 @@ function startTimer() {
 
 /* ================= JOGO ================= */
 
+// Deve carregar os países antes de começar, e deve virar "Tentar novamente"
+// quando a fonte não responder — o botão nunca inicia uma partida sem dados.
+async function handleStartClick() {
+  if (gameActive || countriesPromise) return;
+
+  if (countries.length < MIN_OPTIONS) {
+    const ok = await ensureCountries();
+    if (!ok) return;
+  }
+
+  startGame();
+}
+
 function startGame() {
-  if (countries.length < MIN_OPTIONS) return;
+  if (countries.length < MIN_OPTIONS) {
+    setMessage(t().loadError);
+    return;
+  }
 
   score = 0;
   scoreEl.textContent = score;
   gameActive = true;
+  setMessage("");
 
   availableCountries = shuffle([...countries]);
 
@@ -279,6 +374,7 @@ function newRound() {
   if (!gameActive) return;
 
   if (countries.length < MIN_OPTIONS) {
+    setMessage(t().loadError);
     gameOver();
     return;
   }
@@ -352,7 +448,7 @@ function gameOver() {
 
 /* ================= EVENTOS ================= */
 
-startBtn.addEventListener("click", startGame);
+startBtn.addEventListener("click", handleStartClick);
 
 restartBtn.addEventListener("click", () => {
   gameOverEl.classList.add("hidden");
