@@ -141,8 +141,11 @@ async function loadCountries() {
 
 /* ================= ESTADO ================= */
 
+const MIN_OPTIONS = 4;        // alternativas por rodada — também o mínimo de países para jogar
+const ROUND_SECONDS = 5;      // tempo de cada rodada
+
 let score = 0;
-let timeLeft = 5;
+let timeLeft = ROUND_SECONDS;
 let timerInterval = null;
 let gameActive = false;
 
@@ -238,7 +241,7 @@ function shuffle(array) {
 
 function startTimer() {
   clearInterval(timerInterval);
-  timeLeft = 5;
+  timeLeft = ROUND_SECONDS;
   timerEl.textContent = timeLeft;
 
   timerInterval = setInterval(() => {
@@ -255,6 +258,8 @@ function startTimer() {
 /* ================= JOGO ================= */
 
 function startGame() {
+  if (countries.length < MIN_OPTIONS) return;
+
   score = 0;
   scoreEl.textContent = score;
   gameActive = true;
@@ -267,8 +272,16 @@ function startGame() {
   newRound();
 }
 
+// Deve exibir MIN_OPTIONS alternativas distintas, uma delas correta.
+// O guard de `countries.length` é o que impede o laço abaixo de nunca terminar:
+// com menos países do que alternativas não existem 4 distintos para sortear.
 function newRound() {
   if (!gameActive) return;
+
+  if (countries.length < MIN_OPTIONS) {
+    gameOver();
+    return;
+  }
 
   optionsEl.innerHTML = "";
 
@@ -278,16 +291,16 @@ function newRound() {
 
   correctAnswer = availableCountries.pop();
 
-  let options = [correctAnswer];
+  const options = [correctAnswer];
 
-  while (options.length < 4) {
+  while (options.length < MIN_OPTIONS) {
     const random = countries[Math.floor(Math.random() * countries.length)];
-    if (!options.includes(random)) {
+    if (!options.some(c => c.code === random.code)) {
       options.push(random);
     }
   }
 
-  options = shuffle(options);
+  shuffle(options);
 
   flagEl.src = `https://flagcdn.com/${correctAnswer.code}.svg`;
   flagEl.style.display = "block";
