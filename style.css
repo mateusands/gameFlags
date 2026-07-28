@@ -134,7 +134,7 @@ main {
 }
 
 /* Botão "Voltar" Discreto */
-#backBtn {
+#backBtn, #gameOverBackBtn {
   margin-top: 30px;
   background: transparent;
   border: none;
@@ -144,8 +144,12 @@ main {
   cursor: pointer;
   padding: 10px;
 }
-#backBtn:hover {
+#backBtn:hover, #gameOverBackBtn:hover {
   color: #aaa;
+}
+
+#gameOverBackBtn {
+  margin-top: 0;
 }
 
 /* AVISO DE ERRO

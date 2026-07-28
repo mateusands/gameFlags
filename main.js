@@ -6,6 +6,7 @@ const timerEl = document.getElementById("timer");
 const flagEl = document.getElementById("flag");
 const optionsEl = document.getElementById("options");
 const startBtn = document.getElementById("startBtn");
+const backBtn = document.getElementById("backBtn");
 const messageEl = document.getElementById("message");
 
 // Telas
@@ -15,6 +16,7 @@ const gameOverEl = document.getElementById("gameOver");
 
 const finalScoreEl = document.getElementById("finalScore");
 const restartBtn = document.getElementById("restartBtn");
+const gameOverBackBtn = document.getElementById("gameOverBackBtn");
 
 // UI Text
 const uiTitle = document.getElementById("uiTitle");
@@ -29,14 +31,17 @@ let currentLang = 'pt';
 
 // Tabela ÚNICA de textos da UI. Toda string visível mora aqui, nas 9 entradas —
 // chave faltando renderiza `undefined` na tela, sem erro no console.
+// `htmlLang` é o valor aplicado em <html lang> (acessibilidade / leitor de tela).
 const translations = {
   pt: {
+    htmlLang: "pt-BR",
     title: "🌍 Adivinhe a Bandeira",
     score: "Pontos",
     record: "Recorde",
     start: "Iniciar Jogo",
     loading: "Carregando...",
     retry: "Tentar Novamente",
+    back: "← Mudar Idioma",
     loadError: "Não foi possível carregar os países. Verifique sua conexão.",
     flagError: "As bandeiras não estão carregando. Tente novamente mais tarde.",
     gameOver: "💀 Fim de Jogo!",
@@ -44,12 +49,14 @@ const translations = {
     restart: "Jogar Novamente"
   },
   en: {
+    htmlLang: "en",
     title: "🌍 Guess the Flag",
     score: "Score",
     record: "Best",
     start: "Start Game",
     loading: "Loading...",
     retry: "Try Again",
+    back: "← Change Language",
     loadError: "Could not load the countries. Check your connection.",
     flagError: "Flags are not loading. Please try again later.",
     gameOver: "💀 Game Over!",
@@ -57,12 +64,14 @@ const translations = {
     restart: "Play Again"
   },
   es: {
+    htmlLang: "es",
     title: "🌍 Adivina la Bandera",
     score: "Puntos",
     record: "Récord",
     start: "Iniciar Juego",
     loading: "Cargando...",
     retry: "Intentar de Nuevo",
+    back: "← Cambiar Idioma",
     loadError: "No se pudieron cargar los países. Comprueba tu conexión.",
     flagError: "Las banderas no cargan. Inténtalo más tarde.",
     gameOver: "💀 ¡Fin del Juego!",
@@ -70,12 +79,14 @@ const translations = {
     restart: "Jugar de Nuevo"
   },
   ja: {
+    htmlLang: "ja",
     title: "🌍 国旗を当てよう",
     score: "スコア",
     record: "最高記録",
     start: "ゲームスタート",
     loading: "読み込み中...",
     retry: "再試行",
+    back: "← 言語を変更",
     loadError: "国データを読み込めませんでした。接続を確認してください。",
     flagError: "国旗を読み込めません。しばらくしてからお試しください。",
     gameOver: "💀 ゲームオーバー！",
@@ -83,12 +94,14 @@ const translations = {
     restart: "もう一度"
   },
   zh: {
+    htmlLang: "zh-CN",
     title: "🌍 猜国旗",
     score: "分数",
     record: "最高分",
     start: "开始游戏",
     loading: "加载中...",
     retry: "重试",
+    back: "← 更改语言",
     loadError: "无法加载国家数据，请检查网络连接。",
     flagError: "国旗无法加载，请稍后再试。",
     gameOver: "💀 游戏结束！",
@@ -96,12 +109,14 @@ const translations = {
     restart: "再玩一次"
   },
   ko: {
+    htmlLang: "ko",
     title: "🌍 국기를 맞춰보세요",
     score: "점수",
     record: "최고 기록",
     start: "게임 시작",
     loading: "로딩 중...",
     retry: "다시 시도",
+    back: "← 언어 변경",
     loadError: "국가 목록을 불러오지 못했습니다. 연결을 확인하세요.",
     flagError: "국기를 불러올 수 없습니다. 잠시 후 다시 시도하세요.",
     gameOver: "💀 게임 오버!",
@@ -109,12 +124,14 @@ const translations = {
     restart: "다시 하기"
   },
   ru: {
+    htmlLang: "ru",
     title: "🌍 Угадай флаг",
     score: "Очки",
     record: "Рекорд",
     start: "Начать игру",
     loading: "Загрузка...",
     retry: "Повторить",
+    back: "← Сменить язык",
     loadError: "Не удалось загрузить страны. Проверьте подключение.",
     flagError: "Флаги не загружаются. Попробуйте позже.",
     gameOver: "💀 Игра окончена!",
@@ -122,12 +139,14 @@ const translations = {
     restart: "Играть снова"
   },
   fr: {
+    htmlLang: "fr",
     title: "🌍 Devine le Drapeau",
     score: "Points",
     record: "Record",
     start: "Commencer",
     loading: "Chargement...",
     retry: "Réessayer",
+    back: "← Changer de langue",
     loadError: "Impossible de charger les pays. Vérifiez votre connexion.",
     flagError: "Les drapeaux ne se chargent pas. Réessayez plus tard.",
     gameOver: "💀 Fin de partie !",
@@ -135,12 +154,14 @@ const translations = {
     restart: "Rejouer"
   },
   it: {
+    htmlLang: "it",
     title: "🌍 Indovina la Bandiera",
     score: "Punti",
     record: "Record",
     start: "Inizia il gioco",
     loading: "Caricamento...",
     retry: "Riprova",
+    back: "← Cambia lingua",
     loadError: "Impossibile caricare i paesi. Controlla la connessione.",
     flagError: "Le bandiere non si caricano. Riprova più tardi.",
     gameOver: "💀 Game Over!",
@@ -272,6 +293,7 @@ window.setLanguage = async function(lang) {
 
   languageSelectionEl.classList.add("hidden");
   gameContainerEl.classList.remove("hidden");
+  gameOverEl.classList.add("hidden");
 
   setMessage("");
   updateUIText();
@@ -304,14 +326,21 @@ window.goBackToMenu = function() {
 }
 
 function updateUIText() {
-  const t = translations[currentLang];
-  uiTitle.textContent = t.title;
-  uiScoreLabel.textContent = t.score;
-  uiHighScoreLabel.textContent = t.record;
-  startBtn.textContent = t.start;
-  uiGameOver.textContent = t.gameOver;
-  uiFinalScoreLabel.textContent = t.finalScore;
-  restartBtn.textContent = t.restart;
+  const text = t();
+
+  // O documento inteiro segue o idioma escolhido, não só os textos da tela.
+  document.documentElement.lang = text.htmlLang;
+  document.title = text.title;
+
+  uiTitle.textContent = text.title;
+  uiScoreLabel.textContent = text.score;
+  uiHighScoreLabel.textContent = text.record;
+  startBtn.textContent = text.start;
+  backBtn.textContent = text.back;
+  gameOverBackBtn.textContent = text.back;
+  uiGameOver.textContent = text.gameOver;
+  uiFinalScoreLabel.textContent = text.finalScore;
+  restartBtn.textContent = text.restart;
 }
 
 /* ================= UTIL ================= */
@@ -523,3 +552,5 @@ restartBtn.addEventListener("click", () => {
   gameOverEl.classList.add("hidden");
   startGame();
 });
+
+gameOverBackBtn.addEventListener("click", () => window.goBackToMenu());
