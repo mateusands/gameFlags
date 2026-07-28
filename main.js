@@ -38,6 +38,7 @@ const translations = {
     loading: "Carregando...",
     retry: "Tentar Novamente",
     loadError: "Não foi possível carregar os países. Verifique sua conexão.",
+    flagError: "As bandeiras não estão carregando. Tente novamente mais tarde.",
     gameOver: "💀 Fim de Jogo!",
     finalScore: "Sua pontuação:",
     restart: "Jogar Novamente"
@@ -50,6 +51,7 @@ const translations = {
     loading: "Loading...",
     retry: "Try Again",
     loadError: "Could not load the countries. Check your connection.",
+    flagError: "Flags are not loading. Please try again later.",
     gameOver: "💀 Game Over!",
     finalScore: "Your Score:",
     restart: "Play Again"
@@ -62,6 +64,7 @@ const translations = {
     loading: "Cargando...",
     retry: "Intentar de Nuevo",
     loadError: "No se pudieron cargar los países. Comprueba tu conexión.",
+    flagError: "Las banderas no cargan. Inténtalo más tarde.",
     gameOver: "💀 ¡Fin del Juego!",
     finalScore: "Tu puntuación:",
     restart: "Jugar de Nuevo"
@@ -74,6 +77,7 @@ const translations = {
     loading: "読み込み中...",
     retry: "再試行",
     loadError: "国データを読み込めませんでした。接続を確認してください。",
+    flagError: "国旗を読み込めません。しばらくしてからお試しください。",
     gameOver: "💀 ゲームオーバー！",
     finalScore: "あなたのスコア:",
     restart: "もう一度"
@@ -86,6 +90,7 @@ const translations = {
     loading: "加载中...",
     retry: "重试",
     loadError: "无法加载国家数据，请检查网络连接。",
+    flagError: "国旗无法加载，请稍后再试。",
     gameOver: "💀 游戏结束！",
     finalScore: "你的分数:",
     restart: "再玩一次"
@@ -98,6 +103,7 @@ const translations = {
     loading: "로딩 중...",
     retry: "다시 시도",
     loadError: "국가 목록을 불러오지 못했습니다. 연결을 확인하세요.",
+    flagError: "국기를 불러올 수 없습니다. 잠시 후 다시 시도하세요.",
     gameOver: "💀 게임 오버!",
     finalScore: "당신의 점수:",
     restart: "다시 하기"
@@ -110,6 +116,7 @@ const translations = {
     loading: "Загрузка...",
     retry: "Повторить",
     loadError: "Не удалось загрузить страны. Проверьте подключение.",
+    flagError: "Флаги не загружаются. Попробуйте позже.",
     gameOver: "💀 Игра окончена!",
     finalScore: "Ваш счёт:",
     restart: "Играть снова"
@@ -122,6 +129,7 @@ const translations = {
     loading: "Chargement...",
     retry: "Réessayer",
     loadError: "Impossible de charger les pays. Vérifiez votre connexion.",
+    flagError: "Les drapeaux ne se chargent pas. Réessayez plus tard.",
     gameOver: "💀 Fin de partie !",
     finalScore: "Votre score :",
     restart: "Rejouer"
@@ -134,6 +142,7 @@ const translations = {
     loading: "Caricamento...",
     retry: "Riprova",
     loadError: "Impossibile caricare i paesi. Controlla la connessione.",
+    flagError: "Le bandiere non si caricano. Riprova più tardi.",
     gameOver: "💀 Game Over!",
     finalScore: "Il tuo punteggio:",
     restart: "Gioca ancora"
@@ -216,14 +225,20 @@ async function ensureCountries() {
 
 const MIN_OPTIONS = 4;        // alternativas por rodada — também o mínimo de países para jogar
 const ROUND_SECONDS = 5;      // tempo de cada rodada
+const FLAG_TIMEOUT_MS = 8000; // limite para a bandeira carregar antes de contar como falha
+const MAX_FLAG_FAILURES = 3;  // falhas seguidas de imagem antes de encerrar a partida
 
 let score = 0;
 let timeLeft = ROUND_SECONDS;
 let timerInterval = null;
 let gameActive = false;
+let roundReady = false;       // true só depois que a bandeira da rodada apareceu
 
 let availableCountries = [];
 let correctAnswer = null;
+
+let flagWatchdog = null;
+let flagFailures = 0;
 
 // `localStorage` pode lançar (SecurityError com armazenamento bloqueado,
 // QuotaExceededError em modo privado). Nenhuma dessas falhas pode derrubar o jogo:
@@ -267,7 +282,9 @@ window.setLanguage = async function(lang) {
 
 window.goBackToMenu = function() {
   gameActive = false;
+  roundReady = false;
   clearInterval(timerInterval);
+  clearFlagLoad();
 
   flagEl.style.display = "none";
   optionsEl.innerHTML = "";
@@ -357,6 +374,7 @@ function startGame() {
   score = 0;
   scoreEl.textContent = score;
   gameActive = true;
+  flagFailures = 0;
   setMessage("");
 
   availableCountries = shuffle([...countries]);
@@ -379,6 +397,7 @@ function newRound() {
     return;
   }
 
+  roundReady = false;
   optionsEl.innerHTML = "";
 
   if (availableCountries.length === 0) {
@@ -398,9 +417,6 @@ function newRound() {
 
   shuffle(options);
 
-  flagEl.src = `https://flagcdn.com/${correctAnswer.code}.svg`;
-  flagEl.style.display = "block";
-
   options.forEach(country => {
     const btn = document.createElement("button");
     btn.textContent = country.name[currentLang];
@@ -408,12 +424,63 @@ function newRound() {
     optionsEl.appendChild(btn);
   });
 
+  showFlag(correctAnswer.code);
+}
+
+/* ---- Carregamento da bandeira ----
+   Deve iniciar o timer só quando a imagem estiver visível: antes, os 5 segundos
+   corriam durante o download e o jogador perdia parte da rodada com a tela vazia.
+   Deve sortear outro país quando a imagem falha, e encerrar após MAX_FLAG_FAILURES. */
+
+function clearFlagLoad() {
+  clearTimeout(flagWatchdog);
+  flagWatchdog = null;
+  flagEl.onload = null;
+  flagEl.onerror = null;
+}
+
+function showFlag(code) {
+  clearFlagLoad();
+
+  flagEl.style.display = "none";
+  flagEl.onload = onFlagReady;
+  flagEl.onerror = onFlagFailed;
+  // Imagem que nem carrega nem dá erro (rede pendurada) travaria a rodada para sempre.
+  flagWatchdog = setTimeout(onFlagFailed, FLAG_TIMEOUT_MS);
+
+  flagEl.src = `https://flagcdn.com/${code}.svg`;
+}
+
+function onFlagReady() {
+  clearFlagLoad();
+  if (!gameActive) return;
+
+  flagFailures = 0;
+  roundReady = true;
+  flagEl.style.display = "block";
   startTimer();
 }
 
-function handleAnswer(correct) {
+function onFlagFailed() {
+  clearFlagLoad();
   if (!gameActive) return;
 
+  flagFailures++;
+
+  if (flagFailures >= MAX_FLAG_FAILURES) {
+    setMessage(t().flagError);
+    gameOver();
+    return;
+  }
+
+  newRound();
+}
+
+// `roundReady` evita responder (e pontuar) antes da bandeira aparecer.
+function handleAnswer(correct) {
+  if (!gameActive || !roundReady) return;
+
+  roundReady = false;
   clearInterval(timerInterval);
 
   if (!correct) {
@@ -430,7 +497,9 @@ function handleAnswer(correct) {
 
 function gameOver() {
   gameActive = false;
+  roundReady = false;
   clearInterval(timerInterval);
+  clearFlagLoad();
 
   if (score > highScore) {
     highScore = score;
