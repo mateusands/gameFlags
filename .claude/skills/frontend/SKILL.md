@@ -1,9 +1,9 @@
 ---
 name: frontend
-description: Desenvolvimento do gameFlags (HTML + CSS + JavaScript puro, sem build). Codifica as convenções do repo — handlers globais exigidos pelos onclick do HTML, as 9 traduções obrigatórias, tolerância a falha das APIs externas, limpeza de timer. Use ao mexer em main.js, index.html ou style.css.
+description: Desenvolvimento do flag-rush (HTML + CSS + JavaScript puro, sem build). Codifica as convenções do repo — handlers globais exigidos pelos onclick do HTML, as 9 traduções obrigatórias, tolerância a falha das APIs externas, limpeza de timer. Use ao mexer em main.js, index.html ou style.css.
 ---
 
-# Frontend — gameFlags
+# Frontend — flag-rush
 
 Guia para qualquer mexida no jogo. Segue o `CLAUDE.md`: **não introduza framework/bundler/dependência**,
 **não commite sem ordem**, **não refatore o que não foi pedido**.

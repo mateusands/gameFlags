@@ -1,9 +1,9 @@
 ---
 name: rodar-local
-description: Rodar o gameFlags localmente (sem build, sem npm) e as pegadinhas do ambiente — por que abrir por file:// pode falhar, dependência das APIs externas, como simular queda de rede e como testar os 9 idiomas. Use ao rodar, testar manualmente ou debugar o jogo.
+description: Rodar o flag-rush localmente (sem build, sem npm) e as pegadinhas do ambiente — por que abrir por file:// pode falhar, dependência das APIs externas, como simular queda de rede e como testar os 9 idiomas. Use ao rodar, testar manualmente ou debugar o jogo.
 ---
 
-# Rodar o gameFlags localmente
+# Rodar o flag-rush localmente
 
 ## Não há build
 
@@ -103,4 +103,4 @@ exigência da regra de SDD/BDD/TDD. Antes de dizer "pronto", passe por:
 ## Deploy
 
 GitHub Pages serve a raiz da `main`. Push na `main` publica — **por isso, não commite sem ordem**: um
-push aqui é publicação imediata em https://mateusands.github.io/gameFlags/
+push aqui é publicação imediata em https://mateusands.github.io/flag-rush/

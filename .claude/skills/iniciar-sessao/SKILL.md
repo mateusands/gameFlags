@@ -1,9 +1,9 @@
 ---
 name: iniciar-sessao
-description: Inicializa a sessão de trabalho no gameFlags — lê o CLAUDE.md, o estado do git e as pendências da última sessão, em modo somente leitura, e confirma o alinhamento de escopo antes de qualquer código. Use no começo de cada sessão.
+description: Inicializa a sessão de trabalho no flag-rush — lê o CLAUDE.md, o estado do git e as pendências da última sessão, em modo somente leitura, e confirma o alinhamento de escopo antes de qualquer código. Use no começo de cada sessão.
 ---
 
-# Inicialização de Sessão — gameFlags
+# Inicialização de Sessão — flag-rush
 
 Jogo de navegador em **HTML + CSS + JS puro**, sem build, publicado no GitHub Pages.
 A fonte da verdade é **o código** — três arquivos de código mais o `countries.json` de reserva.
