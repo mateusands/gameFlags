@@ -1,4 +1,4 @@
-# CLAUDE.md — gameFlags (Adivinhe a Bandeira)
+# CLAUDE.md — flag-rush (Adivinhe a Bandeira)
 
 ## Propósito do projeto
 
@@ -6,7 +6,7 @@ Jogo de navegador: uma bandeira é exibida, o jogador tem **5 segundos** para es
 4 opções. Acertou → ponto e próxima rodada. Errou ou o tempo acabou → fim de jogo. O recorde é salvo
 localmente. Suporta **9 idiomas** (pt, en, es, ja, zh, ko, ru, fr, it).
 
-Projeto de portfólio, publicado em **GitHub Pages**: https://mateusands.github.io/gameFlags/
+Projeto de portfólio, publicado em **GitHub Pages**: https://mateusands.github.io/flag-rush/
 
 ---
 
@@ -28,7 +28,7 @@ framework nem dependência que não esteja aqui.
 ### Estrutura
 
 ```
-gameFlags/
+flag-rush/
 ├── index.html      # markup + telas (seleção de idioma, jogo, game over)
 ├── main.js         # tudo: traduções, estado, timer, rodadas, game over
 ├── style.css       # estilo

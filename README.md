@@ -4,7 +4,7 @@ Um jogo simples e divertido feito para navegador onde o jogador deve adivinhar o
 
 O jogo testa conhecimentos de geografia, rapidez e atenção, errar ou deixar o tempo acabar encerra a partida.
 
-👉 Jogue online: https://mateusands.github.io/gameFlags/
+👉 Jogue online: https://mateusands.github.io/flag-rush/
 
 ---
 
@@ -49,7 +49,7 @@ O jogo testa conhecimentos de geografia, rapidez e atenção, errar ou deixar o 
 ## Estrutura do projeto
 
 ```
-gameFlags/
+flag-rush/
 ├── index.html      # markup e telas
 ├── style.css       # estilo
 ├── main.js         # traduções, estado, timer, rodadas
