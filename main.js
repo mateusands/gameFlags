@@ -199,6 +199,15 @@ let countriesByLang = {};   // cache por idioma: { pt: [{ code, name }], ... }
 let countries = [];         // lista já resolvida para o idioma atual
 let countriesPromise = null;
 
+// Territórios cujo flagcdn.com serve o MESMO SVG, byte a byte, do país-sede — não têm
+// bandeira própria. Verificado baixando as 249 bandeiras do countries.json e comparando
+// hash: bv (Ilha Bouvet) e sj (Svalbard e Jan Mayen) = no (Noruega); mf (São Martinho) =
+// fr (França); um (Ilhas Menores Distantes dos EUA) = us (Estados Unidos). Sem isso, quando
+// um deles é sorteado como resposta certa, a imagem exibida é indistinguível da do país-sede
+// e o nome do país-sede nem aparece nas opções — a rodada não tem como ser acertada.
+// Deve excluir esses códigos da lista jogável, nas duas fontes (CDN e reserva local).
+const DUPLICATE_FLAG_CODES = new Set(["bv", "sj", "mf", "um"]);
+
 async function fetchJson(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status} em ${url}`);
@@ -211,6 +220,7 @@ function parseSingleLang(data) {
 
   return Object.entries(data)
     .filter(([code, name]) => /^[a-z]{2}$/i.test(code) && typeof name === "string" && name.trim())
+    .filter(([code]) => !DUPLICATE_FLAG_CODES.has(code.toLowerCase()))
     .map(([code, name]) => ({ code: code.toLowerCase(), name }));
 }
 
@@ -225,6 +235,7 @@ function parseAllLangs(data) {
 
   Object.entries(data).forEach(([code, names]) => {
     if (!/^[a-z]{2}$/i.test(code) || !names || typeof names !== "object") return;
+    if (DUPLICATE_FLAG_CODES.has(code.toLowerCase())) return;
 
     langs.forEach(lang => {
       const name = names[lang] || names.en;
